@@ -1,25 +1,94 @@
+---
+title: 'Hero UI Component Prompt Guide'
+description: 'A guide for AI agents on how to use Hero UI components.'
+---
 
 # Hero UI Component Prompt Guide
 
-This guide provides instructions for AI agents on how to use the components from the Hero UI library.
+You are a senior frontend engineer tasked with building a web page using the Hero UI component library. Your primary goal is to create beautiful, responsive, and maintainable user interfaces.
 
-## General Instructions
+## Your Workflow
 
-When a user asks for a UI element, follow these steps:
+1.  **Understand the Goal:** First, fully understand the user's request.
+2.  **Plan the Layout:** Before writing any code, plan the overall layout of the page. Think about the structure, hierarchy, and how different sections will fit together. Follow the Design Strategy rules below.
+3.  **Component Selection:** Based on your layout plan, select the most appropriate Hero UI components from the documentation below. **You must prioritize using Hero UI components for all parts of the page wherever possible.**
+4.  **Prop Assignment:** For each component, decide which props are necessary to achieve the desired functionality and appearance. You have all the documentation you need; do not ask the user for props. Make educated decisions based on the context.
+5.  **Code Generation:** Write the complete React code for the page, importing all necessary components from `@heroui/react`.
 
-1.  **Identify the component:** From the user's request, identify the most appropriate Hero UI component from the list below.
-2.  **Gather required props:** Check the component's props and ask the user for any missing required information.
-3.  **Generate the code:** Use the provided import statement and example to generate the React code for the component.
+## Design Strategy
+
+### Responsive Design: Mobile-First
+You **must** design mobile-first. Start with the base styles for mobile screens and then use Tailwind's responsive breakpoints (`sm:`, `md:`, `lg:`, `xl:`) to adapt the layout for larger screens.
+
+### Layout: Flexbox & Grid
+You **must** always think in terms of Flexbox and Grid for layouts.
+*   **Grid:** Use for major, large-scale page layouts and structures.
+*   **Flexbox:** Use for smaller component arrangements and alignments within a container.
+
+## Styling Rules
+
+*   **Always Use Semantic Colors:** Semantic colors are available for most components (via the `color` prop) and utility classes (`bg-primary`, `text-danger-500`, etc.). You **must** use them at all times to ensure theme consistency.
+*   **Prioritize the `color` Prop:** When a component supports a `color` prop, it's the preferred way to apply semantic colors.
+*   **Use Semantic Color Classes:** When customizing with `className` or `classNames`, use theme-aware semantic color utilities.
+*   **No Absolute Colors:** NEVER use absolute or specific color classes (e.g., `bg-red-500`, `text-green-600`). This breaks the theme and creates inconsistent UI.
 
 ---
 
-## Colors
+## Color System Deep Dive
 
-Hero UI uses a semantic color system that allows you to theme your application with ease.
+To effectively use Hero UI's color system, it's important to understand its structure. The colors are defined by the following TypeScript types:
+
+```typescript
+type ColorScale = {
+  50: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+  800: string;
+  900: string;
+  foreground: string; // contrast color
+  DEFAULT: string;
+};
+
+type BaseColors = {
+  background: ColorScale; // the page background color
+  foreground: ColorScale; // the page text color
+  divider: ColorScale; // used for divider and single line border
+  overlay: ColorScale; // used for modal, popover, etc.
+  focus: ColorScale; // used for focus state outline
+  content1: ColorScale; // used for card, modal, popover, etc.
+  content2: ColorScale;
+  content3: ColorScale;
+  content4: ColorScale;
+};
+
+// brand colors
+type ThemeColors = BaseColors & {
+  default: ColorScale;
+  primary: ColorScale;
+  secondary: ColorScale;
+  success: ColorScale;
+  warning: ColorScale;
+  danger: ColorScale;
+};
+```
+
+### When to Use Which Colors
+
+*   **Base Colors (`background`, `foreground`, `content1-4`, etc.):** Use these for general layout and structural elements. For example, `bg-background` for the page background, `text-foreground` for body text, and `bg-content1` for card backgrounds.
+*   **Theme Colors (`primary`, `secondary`, `success`, etc.):** Use these for interactive elements, branding, and to convey status. For example, `primary` for main action buttons, `danger` for error messages, and `success` for confirmation indicators.
+
+---
+
+## Colors via `color` Prop
+
+Hero UI uses a semantic color system. For components that support it, the easiest way to apply color is with the `color` prop.
 
 ### Available Colors
-
-The following semantic colors are available for use in most components:
 
 *   `default`
 *   `primary`
@@ -28,17 +97,44 @@ The following semantic colors are available for use in most components:
 *   `warning`
 *   `danger`
 
-These colors will automatically adapt to the current theme (light or dark).
-
 ### How to Use
 
-To apply a color, use the `color` prop on the desired component. For example:
-
-```javascript
+```typescript
 <Button color="primary">Primary Button</Button>
 <Chip color="success">Success Chip</Chip>
 <Spinner color="danger" />
 ```
+
+---
+
+## Colors via `className`
+
+For more granular control, you can use semantic color utility classes directly. These classes are theme-aware and will adapt to light/dark mode.
+
+### Text Color
+- Apply primary text: `<p className="text-primary">...</p>`
+- Shade variant: `<p className="text-primary-600">...</p>`
+
+### Background Color
+- Solid background: `<div className="bg-success">...</div>`
+- With shade: `<div className="bg-success-100">...</div>`
+
+### Border Color
+- Semantic border: `<div className="border border-warning">...</div>`
+- Shade border: `<div className="border border-warning-400">...</div>`
+
+### Hover/Focus States
+- Hover background: `<button className="hover:bg-secondary-200">...</button>`
+- Focus ring: `<input className="focus:outline-none focus:ring-2 focus:ring-primary-500" />`
+
+### Components & Slots
+- Button with color prop: `<Button color="primary">Click</Button>`
+- Slot override: `<CircularProgress classNames={{ indicator: 'stroke-danger-500' }} />`
+
+### Theme-Scoped Styling
+- Apply styles based on theme: `<div className="dark:bg-default-800">...</div>`
+
+**Note:** Semantic colors are available as utilities for most of the tailwind and heroUI components. So you must always use sematic colors. Never use tailwind native colors.
 
 ---
 
@@ -50,7 +146,7 @@ You can override the default styles of a component by passing your own class nam
 
 For components without slots, you can use the `className` prop to apply custom styles.
 
-```javascript
+```typescript
 import {Button} from "@heroui/react";
 
 export default function App() {
@@ -76,7 +172,7 @@ You will find a `Slots` section in the documentation of each component that has 
 
 To style a specific slot, pass an object to the `classNames` prop where the key is the name of the slot and the value is a string of class names.
 
-```javascript
+```typescript
 import {CircularProgress, Card, CardBody} from "@heroui/react";
 
 export default function App() {
@@ -111,7 +207,7 @@ export default function App() {
 **Description:** Accordions display a list of high-level options that can expand/collapse to reveal more information.
 
 **Import:**
-```javascript
+```typescript
 import { Accordion, AccordionItem } from "@heroui/react";
 ```
 
@@ -132,7 +228,7 @@ import { Accordion, AccordionItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the accordion slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Accordion>
@@ -151,33 +247,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Accordion** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Accordion` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## AccordionItem
@@ -188,7 +257,7 @@ export default function App() {
 **Description:** An item within an Accordion component.
 
 **Import:**
-```javascript
+```typescript
 import { AccordionItem } from "@heroui/react";
 ```
 
@@ -209,7 +278,7 @@ import { AccordionItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the accordion item slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Accordion>
@@ -229,33 +298,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **AccordionItem** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `AccordionItem` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Alert
@@ -266,7 +308,7 @@ export default function App() {
 **Description:** Alerts are temporary notifications that provide concise feedback about an action or event.
 
 **Import:**
-```javascript
+```typescript
 import { Alert } from "@heroui/react";
 ```
 
@@ -291,7 +333,7 @@ import { Alert } from "@heroui/react";
 | `onVisibleChange` | `(isVisible: boolean) => void` |  |  | Handler called when the alert visibility changes |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const title = "This is an alert";
   const description = "Thanks for subscribing to our newsletter!";
@@ -311,33 +353,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Alert** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Alert` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Autocomplete
@@ -348,7 +363,7 @@ export default function App() {
 **Description:** Autocomplete is a normal text input enhanced by a panel of suggested options.
 
 **Import:**
-```javascript
+```typescript
 import { Autocomplete, AutocompleteItem } from "@heroui/react";
 ```
 
@@ -383,7 +398,7 @@ import { Autocomplete, AutocompleteItem } from "@heroui/react";
 | `onOpenChange` | `(isOpen: boolean) => void` |  |  | Handler that is called when the open state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const animals = [
     { label: "Cat", value: "cat" },
@@ -412,33 +427,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Autocomplete** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Autocomplete` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## AutocompleteItem
@@ -449,7 +437,7 @@ export default function App() {
 **Description:** An item within an Autocomplete component.
 
 **Import:**
-```javascript
+```typescript
 import { AutocompleteItem } from "@heroui/react";
 ```
 
@@ -465,7 +453,7 @@ import { AutocompleteItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the autocomplete item slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const animals = [
     { label: "Cat", value: "cat", description: "A small domesticated carnivorous mammal" },
@@ -494,33 +482,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **AutocompleteItem** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `AutocompleteItem` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## AutocompleteSection
@@ -531,7 +492,7 @@ export default function App() {
 **Description:** A section within an Autocomplete component to group related items.
 
 **Import:**
-```javascript
+```typescript
 import { AutocompleteSection, AutocompleteItem } from "@heroui/react";
 ```
 
@@ -544,7 +505,7 @@ import { AutocompleteSection, AutocompleteItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the autocomplete section slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const fruits = [
     { label: "Apple", value: "apple" },
@@ -580,33 +541,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **AutocompleteSection** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `AutocompleteSection` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Avatar
@@ -617,7 +551,7 @@ export default function App() {
 **Description:** Avatars are used to represent a user, and display the profile picture, initials or fallback icon.
 
 **Import:**
-```javascript
+```typescript
 import { Avatar } from "@heroui/react";
 ```
 
@@ -642,7 +576,7 @@ import { Avatar } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the avatar slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex gap-4">
@@ -668,33 +602,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Avatar** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Avatar` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## AvatarGroup
@@ -705,7 +612,7 @@ export default function App() {
 **Description:** A wrapper component for Avatar to display a group of avatars.
 
 **Import:**
-```javascript
+```typescript
 import { AvatarGroup, Avatar } from "@heroui/react";
 ```
 
@@ -725,7 +632,7 @@ import { AvatarGroup, Avatar } from "@heroui/react";
 | `renderCount` | `(count: number) => ReactNode` |  |  | A function to render the count of additional avatars. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <AvatarGroup isBordered max={3} total={10}>
@@ -740,33 +647,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **AvatarGroup** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `AvatarGroup` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Badge
@@ -777,7 +657,7 @@ export default function App() {
 **Description:** Badges are used to highlight an item's status for quick recognition.
 
 **Import:**
-```javascript
+```typescript
 import { Badge } from "@heroui/react";
 ```
 
@@ -800,7 +680,7 @@ import { Badge } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the badge slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -829,33 +709,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Badge** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Badge` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## BreadcrumbItem
@@ -866,7 +719,7 @@ export default function App() {
 **Description:** An item within a Breadcrumbs component.
 
 **Import:**
-```javascript
+```typescript
 import { BreadcrumbItem } from "@heroui/react";
 ```
 
@@ -883,7 +736,7 @@ import { BreadcrumbItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the breadcrumb item slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Breadcrumbs>
@@ -914,33 +767,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **BreadcrumbItem** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `BreadcrumbItem` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Breadcrumbs
@@ -951,7 +777,7 @@ export default function App() {
 **Description:** Breadcrumbs display a hierarchy of links to the current page or resource in an application.
 
 **Import:**
-```javascript
+```typescript
 import { Breadcrumbs, BreadcrumbItem } from "@heroui/react";
 ```
 
@@ -971,7 +797,7 @@ import { Breadcrumbs, BreadcrumbItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the breadcrumbs slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Breadcrumbs>
@@ -985,33 +811,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Breadcrumbs** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Breadcrumbs` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Button
@@ -1022,7 +821,7 @@ export default function App() {
 **Description:** Buttons allow users to perform actions and choose with a single tap.
 
 **Import:**
-```javascript
+```typescript
 import { Button } from "@heroui/react";
 ```
 
@@ -1055,7 +854,7 @@ import { Button } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the button slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-wrap gap-4">
@@ -1087,33 +886,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Button** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Button` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## ButtonGroup
@@ -1124,7 +896,7 @@ export default function App() {
 **Description:** ButtonGroup is a wrapper component for Button to display a group of buttons.
 
 **Import:**
-```javascript
+```typescript
 import { ButtonGroup, Button } from "@heroui/react";
 ```
 
@@ -1144,7 +916,7 @@ import { ButtonGroup, Button } from "@heroui/react";
 | `fullWidth` | `boolean` | `false` |  | Whether the button group should take the full width of its parent. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -1180,33 +952,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **ButtonGroup** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `ButtonGroup` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Calendar
@@ -1217,7 +962,7 @@ export default function App() {
 **Description:** Calendar allows users to select a date.
 
 **Import:**
-```javascript
+```typescript
 import { Calendar } from "@heroui/react";
 ```
 
@@ -1242,7 +987,7 @@ import { Calendar } from "@heroui/react";
 | `onChange` | `(date: CalendarDate) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseDate } from "@internationalized/date";
 
 export default function App() {
@@ -1260,33 +1005,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Calendar** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Calendar` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Card
@@ -1297,7 +1015,7 @@ export default function App() {
 **Description:** Card is a container for text, photos, and actions in the context of a single subject.
 
 **Import:**
-```javascript
+```typescript
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/react";
 ```
 
@@ -1325,7 +1043,7 @@ import { Card, CardHeader, CardBody, CardFooter } from "@heroui/react";
 | `onPressUp` | `(e: PressEvent) => void` |  |  | Handler that is called when a press is released over the target. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -1364,33 +1082,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Card** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Card` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Checkbox
@@ -1401,7 +1092,7 @@ export default function App() {
 **Description:** Checkboxes allow users to select multiple items from a list of individual items, or to mark one individual item as selected.
 
 **Import:**
-```javascript
+```typescript
 import { Checkbox } from "@heroui/react";
 ```
 
@@ -1430,7 +1121,7 @@ import { Checkbox } from "@heroui/react";
 | `onValueChange` | `(isSelected: boolean) => void` |  |  | Handler that is called when the element's selection state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isSelected, setIsSelected] = React.useState(false);
   const [groupSelected, setGroupSelected] = React.useState(["javascript"]);
@@ -1490,33 +1181,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Checkbox** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Checkbox` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## CheckboxGroup
@@ -1527,7 +1191,7 @@ export default function App() {
 **Description:** CheckboxGroup is a wrapper component for Checkbox to display a group of checkboxes.
 
 **Import:**
-```javascript
+```typescript
 import { CheckboxGroup, Checkbox } from "@heroui/react";
 ```
 
@@ -1556,7 +1220,7 @@ import { CheckboxGroup, Checkbox } from "@heroui/react";
 | `onValueChange` | `(value: string[]) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [selected, setSelected] = React.useState(["html"]);
 
@@ -1591,33 +1255,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **CheckboxGroup** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `CheckboxGroup` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Chip
@@ -1628,7 +1265,7 @@ export default function App() {
 **Description:** Chips are compact elements that represent an input, attribute, or action.
 
 **Import:**
-```javascript
+```typescript
 import { Chip } from "@heroui/react";
 ```
 
@@ -1651,7 +1288,7 @@ import { Chip } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the chip slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-wrap gap-4">
@@ -1691,33 +1328,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Chip** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Chip` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## CircularProgress
@@ -1728,7 +1338,7 @@ export default function App() {
 **Description:** CircularProgress is used to indicate the loading state of a component or page.
 
 **Import:**
-```javascript
+```typescript
 import { CircularProgress } from "@heroui/react";
 ```
 
@@ -1753,7 +1363,7 @@ import { CircularProgress } from "@heroui/react";
 | `valueLabel` | `ReactNode` |  |  | The content to display as the value label. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState(0);
 
@@ -1826,33 +1436,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **CircularProgress** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `CircularProgress` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Code
@@ -1863,7 +1446,7 @@ export default function App() {
 **Description:** Code is used to display inline code snippets.
 
 **Import:**
-```javascript
+```typescript
 import { Code } from "@heroui/react";
 ```
 
@@ -1877,7 +1460,7 @@ import { Code } from "@heroui/react";
 | `size` | `string` | `md` | `sm`, `md`, `lg` | The size of the code snippet. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -1899,33 +1482,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Code** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Code` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DateInput
@@ -1936,7 +1492,7 @@ export default function App() {
 **Description:** DateInput allows users to enter a date using a text field.
 
 **Import:**
-```javascript
+```typescript
 import { DateInput } from "@heroui/react";
 ```
 
@@ -1964,7 +1520,7 @@ import { DateInput } from "@heroui/react";
 | `onChange` | `(date: CalendarDate) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseDate } from "@internationalized/date";
 
 export default function App() {
@@ -1983,33 +1539,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DateInput** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DateInput` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DatePicker
@@ -2020,7 +1549,7 @@ export default function App() {
 **Description:** DatePicker combines a date input and a calendar popover to allow users to enter or select a date.
 
 **Import:**
-```javascript
+```typescript
 import { DatePicker } from "@heroui/react";
 ```
 
@@ -2048,7 +1577,7 @@ import { DatePicker } from "@heroui/react";
 | `onChange` | `(date: CalendarDate) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseDate } from "@internationalized/date";
 
 export default function App() {
@@ -2067,33 +1596,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DatePicker** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DatePicker` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DateRangePicker
@@ -2104,7 +1606,7 @@ export default function App() {
 **Description:** DateRangePicker allows users to select a range of dates.
 
 **Import:**
-```javascript
+```typescript
 import { DateRangePicker } from "@heroui/react";
 ```
 
@@ -2132,7 +1634,7 @@ import { DateRangePicker } from "@heroui/react";
 | `onChange` | `(range: DateRange) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseDate, DateRange } from "@internationalized/date";
 
 export default function App() {
@@ -2154,33 +1656,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DateRangePicker** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DateRangePicker` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Divider
@@ -2191,7 +1666,7 @@ export default function App() {
 **Description:** Dividers are used to visually separate content in a list or group.
 
 **Import:**
-```javascript
+```typescript
 import { Divider } from "@heroui/react";
 ```
 
@@ -2203,7 +1678,7 @@ import { Divider } from "@heroui/react";
 | `className` | `string` |  |  | The CSS class to apply to the divider. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="max-w-md">
@@ -2234,33 +1709,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Divider** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Divider` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Drawer
@@ -2271,7 +1719,7 @@ export default function App() {
 **Description:** Drawer is a panel that slides out from the edge of the screen.
 
 **Import:**
-```javascript
+```typescript
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/react";
 ```
 
@@ -2295,7 +1743,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@
 | `onClose` | `() => void` |  |  | Handler that is called when the drawer is closed. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -2331,33 +1779,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Drawer** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Drawer` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Dropdown
@@ -2368,7 +1789,7 @@ export default function App() {
 **Description:** Displays a list of actions or options that a user can choose.
 
 **Import:**
-```javascript
+```typescript
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 ```
 
@@ -2388,7 +1809,7 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/r
 | `onClose` | `() => void` |  |  | Handler that is called when the dropdown should close. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Dropdown>
@@ -2409,33 +1830,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Dropdown** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Dropdown` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DropdownItem
@@ -2446,7 +1840,7 @@ export default function App() {
 **Description:** An item within a DropdownMenu component.
 
 **Import:**
-```javascript
+```typescript
 import { DropdownItem } from "@heroui/react";
 ```
 
@@ -2469,7 +1863,7 @@ import { DropdownItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the dropdown item slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Dropdown>
@@ -2514,33 +1908,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DropdownItem** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DropdownItem` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DropdownMenu
@@ -2551,7 +1918,7 @@ export default function App() {
 **Description:** The menu that appears when the dropdown is open.
 
 **Import:**
-```javascript
+```typescript
 import { DropdownMenu } from "@heroui/react";
 ```
 
@@ -2574,7 +1941,7 @@ import { DropdownMenu } from "@heroui/react";
 | `onSelectionChange` | `(keys: Selection) => void` |  |  | Handler that is called when the selection changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [selectedKeys, setSelectedKeys] = React.useState(new Set(["text"]));
 
@@ -2602,33 +1969,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DropdownMenu** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DropdownMenu` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DropdownSection
@@ -2639,7 +1979,7 @@ export default function App() {
 **Description:** A section within a DropdownMenu component to group related items.
 
 **Import:**
-```javascript
+```typescript
 import { DropdownSection, DropdownItem } from "@heroui/react";
 ```
 
@@ -2653,7 +1993,7 @@ import { DropdownSection, DropdownItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the dropdown section slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Dropdown>
@@ -2678,33 +2018,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DropdownSection** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DropdownSection` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## DropdownTrigger
@@ -2715,7 +2028,7 @@ export default function App() {
 **Description:** The trigger element that opens the dropdown menu.
 
 **Import:**
-```javascript
+```typescript
 import { DropdownTrigger } from "@heroui/react";
 ```
 
@@ -2726,7 +2039,7 @@ import { DropdownTrigger } from "@heroui/react";
 | `children` | `ReactNode` |  |  | The content of the dropdown trigger. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <Dropdown>
@@ -2747,33 +2060,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **DropdownTrigger** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `DropdownTrigger` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Image
@@ -2784,7 +2070,7 @@ export default function App() {
 **Description:** The Image component is used to display images with support for fallback.
 
 **Import:**
-```javascript
+```typescript
 import { Image } from "@heroui/react";
 ```
 
@@ -2809,7 +2095,7 @@ import { Image } from "@heroui/react";
 | `onError` | `() => void` |  |  | Handler that is called when the image fails to load. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -2853,33 +2139,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Image** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Image` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Input
@@ -2890,7 +2149,7 @@ export default function App() {
 **Description:** Input is a component that allows users to enter text.
 
 **Import:**
-```javascript
+```typescript
 import { Input } from "@heroui/react";
 ```
 
@@ -2924,7 +2183,7 @@ import { Input } from "@heroui/react";
 | `onValueChange` | `(value: string) => void` |  |  | Handler that is called when the input value changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState("");
 
@@ -2985,33 +2244,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Input** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Input` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## InputOtp
@@ -3022,7 +2254,7 @@ export default function App() {
 **Description:** InputOtp is a component that allows users to enter a one-time password.
 
 **Import:**
-```javascript
+```typescript
 import { InputOtp } from "@heroui/react";
 ```
 
@@ -3050,7 +2282,7 @@ import { InputOtp } from "@heroui/react";
 | `onComplete` | `(value: string) => void` |  |  | Handler that is called when all input fields are filled. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState("");
 
@@ -3081,33 +2313,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **InputOtp** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `InputOtp` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Kbd
@@ -3118,7 +2323,7 @@ export default function App() {
 **Description:** Kbd is used to display keyboard shortcuts.
 
 **Import:**
-```javascript
+```typescript
 import { Kbd } from "@heroui/react";
 ```
 
@@ -3134,7 +2339,7 @@ import { Kbd } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the keyboard shortcut slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -3163,33 +2368,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Kbd** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Kbd` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Link
@@ -3200,7 +2378,7 @@ export default function App() {
 **Description:** Link is a component that allows users to navigate to another page.
 
 **Import:**
-```javascript
+```typescript
 import { Link } from "@heroui/react";
 ```
 
@@ -3220,7 +2398,7 @@ import { Link } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the link slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -3257,33 +2435,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Link** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Link` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Listbox
@@ -3294,7 +2445,7 @@ export default function App() {
 **Description:** Listbox is a component that allows users to select one or more items from a list.
 
 **Import:**
-```javascript
+```typescript
 import { Listbox, ListboxItem } from "@heroui/react";
 ```
 
@@ -3318,7 +2469,7 @@ import { Listbox, ListboxItem } from "@heroui/react";
 | `onSelectionChange` | `(keys: Selection) => void` |  |  | Handler that is called when the selection changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [selectedKeys, setSelectedKeys] = React.useState(new Set(["music"]));
 
@@ -3346,33 +2497,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Listbox** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Listbox` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## ListboxItem
@@ -3383,7 +2507,7 @@ export default function App() {
 **Description:** An item within a Listbox component.
 
 **Import:**
-```javascript
+```typescript
 import { ListboxItem } from "@heroui/react";
 ```
 
@@ -3402,7 +2526,7 @@ import { ListboxItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the listbox item slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="max-w-md">
@@ -3442,33 +2566,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **ListboxItem** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `ListboxItem` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## ListboxSection
@@ -3479,7 +2576,7 @@ export default function App() {
 **Description:** A section within a Listbox component to group related items.
 
 **Import:**
-```javascript
+```typescript
 import { ListboxSection, ListboxItem } from "@heroui/react";
 ```
 
@@ -3493,7 +2590,7 @@ import { ListboxSection, ListboxItem } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the listbox section slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="max-w-md">
@@ -3515,33 +2612,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **ListboxSection** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `ListboxSection` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Modal
@@ -3552,7 +2622,7 @@ export default function App() {
 **Description:** Modal is a dialog that appears on top of the main content and requires user interaction.
 
 **Import:**
-```javascript
+```typescript
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react";
 ```
 
@@ -3577,7 +2647,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 | `onClose` | `() => void` |  |  | Handler that is called when the modal is closed. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -3613,33 +2683,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Modal** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Modal` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Navbar
@@ -3650,7 +2693,7 @@ export default function App() {
 **Description:** Navbar is a responsive navigation header that includes support for branding, links, and more.
 
 **Import:**
-```javascript
+```typescript
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem } from "@heroui/react";
 ```
 
@@ -3672,7 +2715,7 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Navba
 | `onMenuOpenChange` | `(isOpen: boolean) => void` |  |  | Handler that is called when the menu open state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -3755,33 +2798,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Navbar** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Navbar` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## NumberInput
@@ -3792,7 +2808,7 @@ export default function App() {
 **Description:** NumberInput is a component that allows users to enter a number.
 
 **Import:**
-```javascript
+```typescript
 import { NumberInput } from "@heroui/react";
 ```
 
@@ -3827,7 +2843,7 @@ import { NumberInput } from "@heroui/react";
 | `onValueChange` | `(value: number) => void` |  |  | Handler that is called when the input value changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState(0);
 
@@ -3875,33 +2891,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **NumberInput** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `NumberInput` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Pagination
@@ -3912,7 +2901,7 @@ export default function App() {
 **Description:** Pagination is used to navigate between pages of content.
 
 **Import:**
-```javascript
+```typescript
 import { Pagination } from "@heroui/react";
 ```
 
@@ -3941,7 +2930,7 @@ import { Pagination } from "@heroui/react";
 | `onChange` | `(page: number) => void` |  |  | Handler that is called when the page changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -4009,33 +2998,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Pagination** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Pagination` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Popover
@@ -4046,7 +3008,7 @@ export default function App() {
 **Description:** Popover is a non-modal dialog that floats around its disclosure.
 
 **Import:**
-```javascript
+```typescript
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
 ```
 
@@ -4072,7 +3034,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
 | `onClose` | `() => void` |  |  | Handler that is called when the popover is closed. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-wrap gap-4">
@@ -4117,33 +3079,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Popover** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Popover` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Progress
@@ -4154,7 +3089,7 @@ export default function App() {
 **Description:** Progress is used to display the progress of a task or to show a data visualization.
 
 **Import:**
-```javascript
+```typescript
 import { Progress } from "@heroui/react";
 ```
 
@@ -4179,7 +3114,7 @@ import { Progress } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the progress bar slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState(0);
 
@@ -4242,33 +3177,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Progress** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Progress` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Radio
@@ -4279,7 +3187,7 @@ export default function App() {
 **Description:** Radio buttons allow users to select a single option from a list of options.
 
 **Import:**
-```javascript
+```typescript
 import { Radio } from "@heroui/react";
 ```
 
@@ -4304,7 +3212,7 @@ import { Radio } from "@heroui/react";
 | `onValueChange` | `(isSelected: boolean) => void` |  |  | Handler that is called when the element's selection state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [selected, setSelected] = React.useState("a");
 
@@ -4339,33 +3247,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Radio** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Radio` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## RadioGroup
@@ -4376,7 +3257,7 @@ export default function App() {
 **Description:** RadioGroup is a wrapper component for Radio to display a group of radio buttons.
 
 **Import:**
-```javascript
+```typescript
 import { RadioGroup, Radio } from "@heroui/react";
 ```
 
@@ -4403,7 +3284,7 @@ import { RadioGroup, Radio } from "@heroui/react";
 | `onValueChange` | `(value: string) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [selected, setSelected] = React.useState("london");
 
@@ -4437,33 +3318,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **RadioGroup** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `RadioGroup` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## RangeCalendar
@@ -4474,7 +3328,7 @@ export default function App() {
 **Description:** RangeCalendar allows users to select a range of dates.
 
 **Import:**
-```javascript
+```typescript
 import { RangeCalendar } from "@heroui/react";
 ```
 
@@ -4499,7 +3353,7 @@ import { RangeCalendar } from "@heroui/react";
 | `onChange` | `(range: DateRange) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseDate, DateRange } from "@internationalized/date";
 
 export default function App() {
@@ -4520,33 +3374,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **RangeCalendar** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `RangeCalendar` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## ScrollShadow
@@ -4557,7 +3384,7 @@ export default function App() {
 **Description:** ScrollShadow is a container that shows a shadow when the content is scrollable.
 
 **Import:**
-```javascript
+```typescript
 import { ScrollShadow } from "@heroui/react";
 ```
 
@@ -4575,7 +3402,7 @@ import { ScrollShadow } from "@heroui/react";
 | `className` | `string` |  |  | The CSS class to apply to the scroll shadow container. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-8 max-w-md">
@@ -4606,33 +3433,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **ScrollShadow** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `ScrollShadow` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Select
@@ -4643,7 +3443,7 @@ export default function App() {
 **Description:** Select allows users to select a value from a list of options.
 
 **Import:**
-```javascript
+```typescript
 import { Select, SelectItem } from "@heroui/react";
 ```
 
@@ -4679,7 +3479,7 @@ import { Select, SelectItem } from "@heroui/react";
 | `onOpenChange` | `(isOpen: boolean) => void` |  |  | Handler that is called when the open state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState(new Set(["cat"]));
 
@@ -4730,33 +3530,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Select** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Select` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Skeleton
@@ -4767,7 +3540,7 @@ export default function App() {
 **Description:** Skeleton is used to display a placeholder preview of content before the data gets loaded.
 
 **Import:**
-```javascript
+```typescript
 import { Skeleton } from "@heroui/react";
 ```
 
@@ -4781,7 +3554,7 @@ import { Skeleton } from "@heroui/react";
 | `className` | `string` |  |  | The CSS class to apply to the skeleton. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isLoaded, setIsLoaded] = React.useState(false);
 
@@ -4836,33 +3609,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Skeleton** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Skeleton` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Slider
@@ -4873,7 +3619,7 @@ export default function App() {
 **Description:** Slider allows users to select a value from a range.
 
 **Import:**
-```javascript
+```typescript
 import { Slider } from "@heroui/react";
 ```
 
@@ -4907,7 +3653,7 @@ import { Slider } from "@heroui/react";
 | `onChangeEnd` | `(value: number \| number[]) => void` |  |  | Handler that is called when the user stops dragging the slider. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState(25);
   const [rangeValue, setRangeValue] = React.useState([25, 75]);
@@ -4962,33 +3708,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Slider** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Slider` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Snippet
@@ -4999,7 +3718,7 @@ export default function App() {
 **Description:** Snippet is used to display code snippets with syntax highlighting.
 
 **Import:**
-```javascript
+```typescript
 import { Snippet } from "@heroui/react";
 ```
 
@@ -5019,7 +3738,7 @@ import { Snippet } from "@heroui/react";
 | `onCopy` | `() => void` |  |  | Handler that is called when the code is copied. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4 max-w-md">
@@ -5056,33 +3775,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Snippet** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Snippet` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Spacer
@@ -5093,7 +3785,7 @@ export default function App() {
 **Description:** Spacer is used to add space between components.
 
 **Import:**
-```javascript
+```typescript
 import { Spacer } from "@heroui/react";
 ```
 
@@ -5106,7 +3798,7 @@ import { Spacer } from "@heroui/react";
 | `className` | `string` |  |  | The CSS class to apply to the spacer. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -5143,33 +3835,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Spacer** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Spacer` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Spinner
@@ -5180,7 +3845,7 @@ export default function App() {
 **Description:** Spinner is used to indicate the loading state of a component or page.
 
 **Import:**
-```javascript
+```typescript
 import { Spinner } from "@heroui/react";
 ```
 
@@ -5196,7 +3861,7 @@ import { Spinner } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the spinner slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-8">
@@ -5233,33 +3898,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Spinner** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Spinner` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Switch
@@ -5270,7 +3908,7 @@ export default function App() {
 **Description:** Switch is used to toggle between two states.
 
 **Import:**
-```javascript
+```typescript
 import { Switch } from "@heroui/react";
 ```
 
@@ -5296,7 +3934,7 @@ import { Switch } from "@heroui/react";
 | `onValueChange` | `(isSelected: boolean) => void` |  |  | Handler that is called when the element's selection state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [isSelected, setIsSelected] = React.useState(false);
 
@@ -5352,33 +3990,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Switch** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Switch` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Table
@@ -5389,7 +4000,7 @@ export default function App() {
 **Description:** Table is used to display data in a tabular format.
 
 **Import:**
-```javascript
+```typescript
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/react";
 ```
 
@@ -5425,7 +4036,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from 
 | `onRowAction` | `(key: Key) => void` |  |  | Handler that is called when a row is activated. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const columns = [
     { key: "name", label: "NAME" },
@@ -5478,33 +4089,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Table** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Table` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Tabs
@@ -5515,7 +4099,7 @@ export default function App() {
 **Description:** Tabs organize content into multiple sections and allow users to navigate between them.
 
 **Import:**
-```javascript
+```typescript
 import { Tabs, Tab } from "@heroui/react";
 ```
 
@@ -5540,7 +4124,7 @@ import { Tabs, Tab } from "@heroui/react";
 | `onSelectionChange` | `(key: Key) => void` |  |  | Handler that is called when the selected tab changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-8">
@@ -5613,33 +4197,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Tabs** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Tabs` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Textarea
@@ -5650,7 +4207,7 @@ export default function App() {
 **Description:** Textarea is a component that allows users to enter multiple lines of text.
 
 **Import:**
-```javascript
+```typescript
 import { Textarea } from "@heroui/react";
 ```
 
@@ -5682,7 +4239,7 @@ import { Textarea } from "@heroui/react";
 | `onValueChange` | `(value: string) => void` |  |  | Handler that is called when the textarea value changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   const [value, setValue] = React.useState("");
 
@@ -5726,33 +4283,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Textarea** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Textarea` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## TimeInput
@@ -5763,7 +4293,7 @@ export default function App() {
 **Description:** TimeInput allows users to enter a time using a text field.
 
 **Import:**
-```javascript
+```typescript
 import { TimeInput } from "@heroui/react";
 ```
 
@@ -5791,7 +4321,7 @@ import { TimeInput } from "@heroui/react";
 | `onChange` | `(time: Time) => void` |  |  | Handler that is called when the value changes. |
 
 **Example:**
-```javascript
+```typescript
 import { parseTime } from "@internationalized/date";
 
 export default function App() {
@@ -5815,33 +4345,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **TimeInput** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `TimeInput` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## Tooltip
@@ -5852,7 +4355,7 @@ export default function App() {
 **Description:** Tooltip displays informative text when users hover over, focus on, or tap an element.
 
 **Import:**
-```javascript
+```typescript
 import { Tooltip } from "@heroui/react";
 ```
 
@@ -5878,7 +4381,7 @@ import { Tooltip } from "@heroui/react";
 | `onOpenChange` | `(isOpen: boolean) => void` |  |  | Handler that is called when the open state changes. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-wrap gap-4">
@@ -5920,33 +4423,6 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **Tooltip** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `Tooltip` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
 
 ## User
@@ -5957,7 +4433,7 @@ export default function App() {
 **Description:** User is used to display a user's avatar, name, and description.
 
 **Import:**
-```javascript
+```typescript
 import { User } from "@heroui/react";
 ```
 
@@ -5971,7 +4447,7 @@ import { User } from "@heroui/react";
 | `classNames` | `object` |  |  | Allows to set custom class names for the user slots. |
 
 **Example:**
-```javascript
+```typescript
 export default function App() {
   return (
     <div className="flex flex-col gap-4">
@@ -6013,31 +4489,4 @@ export default function App() {
 ```
 
 </details>
-
-### AI Agent Prompt
-
-You are an expert React developer specializing in the **Hero UI** library. A user wants to use the **User** component.
-
-**Your task is to:**
-
-1.  **Acknowledge the request** for the `User` component.
-2.  **Analyze the user's request** for any provided props.
-3.  **If necessary, ask for any missing required props.** Refer to the props table above.
-4.  **Generate the React code** for the component, using the provided import and example as a reference.
-
-**Example User Request:** "I need a button for my form."
-
-**Example AI Response:**
-
-"Of course. Here is a basic `<Button>` component from the Hero UI library. What text should the button display, and are there any specific colors or styles you would like to apply?"
-
-```javascript
-import { Button } from "@heroui/react";
-
-export default function App() {
-  return (
-    <Button>Click me</Button>
-  );
-}
-```
 ---
